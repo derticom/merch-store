@@ -18,7 +18,7 @@ func (h *Handler) SendCoin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fromUserID := r.Context().Value("userID").(uuid.UUID)
+	fromUserID := r.Context().Value(userIDKey).(uuid.UUID)
 	toUserID, err := uuid.Parse(req.ToUser)
 	if err != nil {
 		http.Error(w, "invalid user ID", http.StatusBadRequest)

@@ -12,7 +12,7 @@ func (h *Handler) BuyItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	itemName := vars["item"]
 
-	userID := r.Context().Value("userID").(uuid.UUID)
+	userID := r.Context().Value(userIDKey).(uuid.UUID)
 
 	if err := h.Service.BuyItem(r.Context(), userID, itemName); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

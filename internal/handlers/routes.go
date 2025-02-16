@@ -9,7 +9,9 @@ func (h *Handler) RegisterRoutes(router *mux.Router) {
 	api.HandleFunc("/auth/register", h.Register).Methods("POST")
 	api.HandleFunc("/auth/login", h.Login).Methods("POST")
 
-	api.HandleFunc("/info", h.GetInfo).Methods("GET")
-	api.HandleFunc("/sendCoin", h.SendCoin).Methods("POST")
-	api.HandleFunc("/buy/{item}", h.BuyItem).Methods("GET")
+	protected := router.PathPrefix("/api").Subrouter()
+	protected.Use(JWTAuthMiddleware)
+	protected.HandleFunc("/info", h.GetInfo).Methods("GET")
+	protected.HandleFunc("/sendCoin", h.SendCoin).Methods("POST")
+	protected.HandleFunc("/buy/{item}", h.BuyItem).Methods("GET")
 }

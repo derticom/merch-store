@@ -9,7 +9,7 @@ import (
 
 // GetInfo - обработчик для получения информации о пользователе.
 func (h *Handler) GetInfo(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userID").(uuid.UUID)
+	userID := r.Context().Value(userIDKey).(uuid.UUID)
 
 	user, err := h.Service.GetUserByID(r.Context(), userID)
 	if err != nil {
