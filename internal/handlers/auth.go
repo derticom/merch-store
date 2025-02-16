@@ -24,7 +24,7 @@ func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.Service.RegisterUser(r.Context(), req.Username, req.Password)
+	user, err := h.service.RegisterUser(r.Context(), req.Username, req.Password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -51,7 +51,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := h.Service.AuthenticateUser(r.Context(), req.Username, req.Password)
+	user, err := h.service.AuthenticateUser(r.Context(), req.Username, req.Password)
 	if err != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return

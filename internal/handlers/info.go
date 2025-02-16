@@ -11,19 +11,19 @@ import (
 func (h *Handler) GetInfo(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(userIDKey).(uuid.UUID)
 
-	user, err := h.Service.GetUserByID(r.Context(), userID)
+	user, err := h.service.GetUserByID(r.Context(), userID)
 	if err != nil {
 		http.Error(w, "user not found", http.StatusNotFound)
 		return
 	}
 
-	transactions, err := h.Service.GetTransactionHistory(r.Context(), userID)
+	transactions, err := h.service.GetTransactionHistory(r.Context(), userID)
 	if err != nil {
 		http.Error(w, "failed to get transaction history", http.StatusInternalServerError)
 		return
 	}
 
-	purchases, err := h.Service.GetPurchaseHistory(r.Context(), userID)
+	purchases, err := h.service.GetPurchaseHistory(r.Context(), userID)
 	if err != nil {
 		http.Error(w, "failed to get purchase history", http.StatusInternalServerError)
 		return

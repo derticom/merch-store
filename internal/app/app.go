@@ -26,7 +26,7 @@ func Run(ctx context.Context, cfg *config.Config, log *slog.Logger) error {
 
 	service := services.New(storage)
 
-	handler := handlers.NewHandler(service)
+	handler := handlers.New(service)
 
 	router := mux.NewRouter()
 	handler.RegisterRoutes(router)

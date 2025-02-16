@@ -14,7 +14,7 @@ func (h *Handler) BuyItem(w http.ResponseWriter, r *http.Request) {
 
 	userID := r.Context().Value(userIDKey).(uuid.UUID)
 
-	if err := h.Service.BuyItem(r.Context(), userID, itemName); err != nil {
+	if err := h.service.BuyItem(r.Context(), userID, itemName); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

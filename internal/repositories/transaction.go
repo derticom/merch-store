@@ -8,11 +8,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type TransactionRepository interface {
-	CreateTransaction(ctx context.Context, transaction *models.Transaction) error
-	GetTransactionsByUserID(ctx context.Context, userID uuid.UUID) ([]models.Transaction, error)
-}
-
 func (s *Storage) CreateTransaction(ctx context.Context, transaction *models.Transaction) error {
 	query := `INSERT INTO transactions (id, from_user, to_user, amount) VALUES ($1, $2, $3, $4)`
 	_, err := s.db.ExecContext(ctx, query, transaction.ID, transaction.FromUser, transaction.ToUser, transaction.Amount)

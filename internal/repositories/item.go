@@ -8,11 +8,6 @@ import (
 	"github.com/derticom/merch-store/internal/models"
 )
 
-type ItemRepository interface {
-	GetAllItems(ctx context.Context) ([]models.Item, error)
-	GetItemByName(ctx context.Context, name string) (*models.Item, error)
-}
-
 func (s *Storage) GetAllItems(ctx context.Context) ([]models.Item, error) {
 	query := `SELECT name, price FROM items`
 	rows, err := s.db.QueryContext(ctx, query)

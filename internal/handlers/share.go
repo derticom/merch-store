@@ -25,7 +25,7 @@ func (h *Handler) SendCoin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.Service.SendCoins(r.Context(), fromUserID, toUserID, req.Amount); err != nil {
+	if err := h.service.SendCoins(r.Context(), fromUserID, toUserID, req.Amount); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

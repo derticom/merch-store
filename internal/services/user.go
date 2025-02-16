@@ -10,15 +10,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserServiceInterface interface {
-	RegisterUser(ctx context.Context, username, password string) (*models.User, error)
-	AuthenticateUser(ctx context.Context, username, password string) (*models.User, error)
-	GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error)
-	UpdateUserCoins(ctx context.Context, id uuid.UUID, coins int) error
-}
+const initialBalance = 1000
 
 func (s *Service) RegisterUser(ctx context.Context, username, password string) (*models.User, error) {
-	// Проверяем, существует ли пользователь с таким именем
 	existingUser, err := s.repo.GetUserByUsername(ctx, username)
 	if err != nil {
 		return nil, err
@@ -27,21 +21,18 @@ func (s *Service) RegisterUser(ctx context.Context, username, password string) (
 		return nil, errors.New("username already exists")
 	}
 
-	// Хэшируем пароль
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
 
-	// Создаем нового пользователя
 	user := &models.User{
 		ID:       uuid.New(),
 		Username: username,
 		Password: string(hashedPassword),
-		Coins:    1000, // Начальный баланс
+		Coins:    initialBalance,
 	}
 
-	// Сохраняем пользователя в базе данных
 	if err := s.repo.CreateUser(ctx, user); err != nil {
 		return nil, err
 	}
@@ -50,7 +41,6 @@ func (s *Service) RegisterUser(ctx context.Context, username, password string) (
 }
 
 func (s *Service) AuthenticateUser(ctx context.Context, username, password string) (*models.User, error) {
-	// Получаем пользователя по имени
 	user, err := s.repo.GetUserByUsername(ctx, username)
 	if err != nil {
 		return nil, err
@@ -59,7 +49,6 @@ func (s *Service) AuthenticateUser(ctx context.Context, username, password strin
 		return nil, errors.New("user not found")
 	}
 
-	// Проверяем пароль
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return nil, errors.New("invalid password")
 	}
