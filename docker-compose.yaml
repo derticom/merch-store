@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: merch_store
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "merch_store"]
+      interval: 10s
+      retries: 5
+    networks:
+      - backend
+
+  merch-store:
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
+    container_name: merch-store
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+
+networks:
+  backend:

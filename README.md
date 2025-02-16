@@ -19,7 +19,7 @@
 
 2. Убедитесь в наличии установленных Docker и Docker Compose.
 3. Соберите и запустите контейнеры:
-   ```docker-compose up --build```
+   ```docker compose up --build```
 
 4. Сервер будет доступен по адресу http://localhost:8080.
 
