@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
 	"github.com/derticom/merch-store/internal/models"
 
@@ -42,4 +43,54 @@ func (s *Storage) GetTransactionsByUserID(ctx context.Context, userID uuid.UUID)
 	}
 
 	return transactions, nil
+}
+
+func (s *Storage) SendCoins(ctx context.Context, fromUserID, toUserID uuid.UUID, amount int) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var fromUserCoins int
+	query := `SELECT coins FROM users WHERE id = $1`
+	err = tx.QueryRowContext(ctx, query, fromUserID).Scan(&fromUserCoins)
+	if err != nil {
+		return err
+	}
+
+	if fromUserCoins < amount {
+		return errors.New("insufficient coins")
+	}
+
+	query = `UPDATE users SET coins = coins - $1 WHERE id = $2`
+	_, err = tx.ExecContext(ctx, query, amount, fromUserID)
+	if err != nil {
+		return err
+	}
+
+	query = `UPDATE users SET coins = coins + $1 WHERE id = $2`
+	_, err = tx.ExecContext(ctx, query, amount, toUserID)
+	if err != nil {
+		return err
+	}
+
+	transaction := &models.Transaction{
+		ID:       uuid.New(),
+		FromUser: fromUserID,
+		ToUser:   toUserID,
+		Amount:   amount,
+	}
+	query = `INSERT INTO transactions (id, from_user, to_user, amount, created_at) VALUES ($1, $2, $3, $4, $5)`
+	_, err = tx.ExecContext(ctx, query, transaction.ID, transaction.FromUser, transaction.ToUser,
+		transaction.Amount, transaction.CreatedAt)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
 }

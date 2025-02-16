@@ -5,7 +5,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/derticom/merch-store/internal/models"
 	"github.com/derticom/merch-store/internal/services/mocks"
 
 	"github.com/golang/mock/gomock"
@@ -24,15 +23,6 @@ func TestService_SendCoins(t *testing.T) {
 	toUserID := uuid.New()
 	amount := 50
 
-	fromUser := &models.User{
-		ID:    fromUserID,
-		Coins: 100,
-	}
-	toUser := &models.User{
-		ID:    toUserID,
-		Coins: 50,
-	}
-
 	tests := []struct {
 		name        string
 		setup       func()
@@ -44,11 +34,7 @@ func TestService_SendCoins(t *testing.T) {
 		{
 			name: "successful coin transfer",
 			setup: func() {
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), fromUserID).Return(fromUser, nil)
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), toUserID).Return(toUser, nil)
-				mockRepo.EXPECT().UpdateUserCoins(gomock.Any(), fromUserID, fromUser.Coins-amount).Return(nil)
-				mockRepo.EXPECT().UpdateUserCoins(gomock.Any(), toUserID, toUser.Coins+amount).Return(nil)
-				mockRepo.EXPECT().CreateTransaction(gomock.Any(), gomock.Any()).Return(nil)
+				mockRepo.EXPECT().SendCoins(gomock.Any(), fromUserID, toUserID, amount).Return(nil)
 			},
 			fromUserID:  fromUserID,
 			toUserID:    toUserID,
@@ -56,96 +42,30 @@ func TestService_SendCoins(t *testing.T) {
 			expectedErr: nil,
 		},
 		{
-			name: "sender and receiver are the same",
-			setup: func() {
-				// Никаких вызовов репозитория, так как проверка происходит до обращения к репозиторию
-			},
+			name:        "sender and receiver are the same",
+			setup:       func() {},
 			fromUserID:  fromUserID,
-			toUserID:    fromUserID, // Отправитель и получатель совпадают
+			toUserID:    fromUserID,
 			amount:      amount,
 			expectedErr: errors.New("cannot send coins to yourself"),
 		},
 		{
-			name: "non-positive amount",
-			setup: func() {
-				// Никаких вызовов репозитория, так как проверка происходит до обращения к репозиторию
-			},
+			name:        "non-positive amount",
+			setup:       func() {},
 			fromUserID:  fromUserID,
 			toUserID:    toUserID,
-			amount:      0, // Нулевая сумма
+			amount:      0,
 			expectedErr: errors.New("amount must be positive"),
 		},
 		{
-			name: "sender not found",
+			name: "error in repository",
 			setup: func() {
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), fromUserID).Return(nil, nil)
+				mockRepo.EXPECT().SendCoins(gomock.Any(), fromUserID, toUserID, amount).Return(errors.New("repository error"))
 			},
 			fromUserID:  fromUserID,
 			toUserID:    toUserID,
 			amount:      amount,
-			expectedErr: errors.New("sender not found"),
-		},
-		{
-			name: "receiver not found",
-			setup: func() {
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), fromUserID).Return(fromUser, nil)
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), toUserID).Return(nil, nil)
-			},
-			fromUserID:  fromUserID,
-			toUserID:    toUserID,
-			amount:      amount,
-			expectedErr: errors.New("receiver not found"),
-		},
-		{
-			name: "insufficient coins",
-			setup: func() {
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), fromUserID).Return(fromUser, nil)
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), toUserID).Return(toUser, nil)
-			},
-			fromUserID:  fromUserID,
-			toUserID:    toUserID,
-			amount:      150, // Сумма больше, чем есть у отправителя
-			expectedErr: errors.New("insufficient coins"),
-		},
-		{
-			name: "error updating sender's coins",
-			setup: func() {
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), fromUserID).Return(fromUser, nil)
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), toUserID).Return(toUser, nil)
-				mockRepo.EXPECT().UpdateUserCoins(gomock.Any(), fromUserID, fromUser.Coins-amount).Return(
-					errors.New("update error"))
-			},
-			fromUserID:  fromUserID,
-			toUserID:    toUserID,
-			amount:      amount,
-			expectedErr: errors.New("update error"),
-		},
-		{
-			name: "error updating receiver's coins",
-			setup: func() {
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), fromUserID).Return(fromUser, nil)
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), toUserID).Return(toUser, nil)
-				mockRepo.EXPECT().UpdateUserCoins(gomock.Any(), fromUserID, fromUser.Coins-amount).Return(nil)
-				mockRepo.EXPECT().UpdateUserCoins(gomock.Any(), toUserID, toUser.Coins+amount).Return(errors.New("update error"))
-			},
-			fromUserID:  fromUserID,
-			toUserID:    toUserID,
-			amount:      amount,
-			expectedErr: errors.New("update error"),
-		},
-		{
-			name: "error creating transaction",
-			setup: func() {
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), fromUserID).Return(fromUser, nil)
-				mockRepo.EXPECT().GetUserByID(gomock.Any(), toUserID).Return(toUser, nil)
-				mockRepo.EXPECT().UpdateUserCoins(gomock.Any(), fromUserID, fromUser.Coins-amount).Return(nil)
-				mockRepo.EXPECT().UpdateUserCoins(gomock.Any(), toUserID, toUser.Coins+amount).Return(nil)
-				mockRepo.EXPECT().CreateTransaction(gomock.Any(), gomock.Any()).Return(errors.New("transaction error"))
-			},
-			fromUserID:  fromUserID,
-			toUserID:    toUserID,
-			amount:      amount,
-			expectedErr: errors.New("transaction error"),
+			expectedErr: errors.New("repository error"),
 		},
 	}
 

@@ -20,6 +20,7 @@ type Repository interface {
 	GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error)
 	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
 	UpdateUserCoins(ctx context.Context, id uuid.UUID, coins int) error
+	SendCoins(ctx context.Context, fromUserID, toUserID uuid.UUID, amount int) error
 }
 
 type Service struct {
