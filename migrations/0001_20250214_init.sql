@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS transactions
     from_user  UUID NOT NULL REFERENCES users(id),
     to_user    UUID NOT NULL REFERENCES users(id),
     amount     INT NOT NULL,
-    cteated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS purchase
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS purchase
     id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id    UUID NOT NULL REFERENCES users(id),
     item       TEXT NOT NULL REFERENCES items(name),
-    cteated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 INSERT INTO items (name, price)

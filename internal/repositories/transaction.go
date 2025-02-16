@@ -81,9 +81,8 @@ func (s *Storage) SendCoins(ctx context.Context, fromUserID, toUserID uuid.UUID,
 		ToUser:   toUserID,
 		Amount:   amount,
 	}
-	query = `INSERT INTO transactions (id, from_user, to_user, amount, created_at) VALUES ($1, $2, $3, $4, $5)`
-	_, err = tx.ExecContext(ctx, query, transaction.ID, transaction.FromUser, transaction.ToUser,
-		transaction.Amount, transaction.CreatedAt)
+	query = `INSERT INTO transactions (id, from_user, to_user, amount) VALUES ($1, $2, $3, $4)`
+	_, err = tx.ExecContext(ctx, query, transaction.ID, transaction.FromUser, transaction.ToUser, transaction.Amount)
 	if err != nil {
 		return err
 	}
