@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -10,5 +12,5 @@ type Transaction struct {
 	FromUser  uuid.UUID `json:"from_user" db:"from_user"`
 	ToUser    uuid.UUID `json:"to_user" db:"to_user"`
 	Amount    int       `json:"amount" db:"amount"`
-	CreatedAt int       `json:"created_at" db:"created_at"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
